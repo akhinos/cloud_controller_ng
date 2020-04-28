@@ -104,7 +104,13 @@ module Kpack
 
     def get_environment_variables(staging_details)
       staging_details.environment_variables.
-        except('VCAP_SERVICES').
+        map do |key, value|
+          if key == 'VCAP_SERVICES'
+            value = JSON.generate(value) if value.is_a?(Hash)
+            key = 'CNB_SERVICES'
+          end
+          [key, value]
+        end.
         map { |key, value| { name: key, value: value.to_s } }
     end
 
